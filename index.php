@@ -4,6 +4,7 @@ function createImage(): string
 {
     $imageLink = __DIR__ . '/img/banner.jpg';
     $font = __DIR__ . "/font/ptsans.ttf";
+    $imageCoverLink = 'https://img2.pngio.com/transparent-grey-background-png-6-png-image-grey-background-png-1920_1080.png';
     $newImageName = __DIR__  . '/tmp/' . generateRandomName() . '.png';
 
     $title = 'Пользуясь случаем';
@@ -20,6 +21,14 @@ function createImage(): string
 
     // получаем изображение
     $image = imagecreatefromjpeg($imageLink);
+    imagecrop($image, ['x' => 0, 'y' => 0, 'width' => 1200, 'height' => 600]);
+    $imageCover = imagecreatefrompng($imageCoverLink);
+
+    imagealphablending($imageCover, true);
+    imagesavealpha($imageCover, true);
+    imagealphablending($image, true);
+    imagesavealpha($image, true);
+    imagecopy($image, $imageCover, 0, 0, 0, 0, imagesx($imageCover), imagesy($imageCover));
 
     //создаем цвет надписи
     $color = imagecolorallocate($image, 0xFF, 0xFF, 0xFF);
@@ -56,22 +65,3 @@ function generateRandomName(int $length = 10): string
     }
     return $randomString;
 }
-
-createImage();
-
-
-//$conv = new Converter();
-//try {
-//    $conv->source(__DIR__ . '/index.html')
-//        ->toPng()
-//        ->save(__DIR__ . '/img/google.png');
-//}catch (\Exception $e) {
-//    echo  $e->getMessage();
-//}
-
-//$conv->source('http://localhost:8000/index.html')
-//    ->toJpg()
-//    ->save(__DIR__ . '/images/godogle.jpg');
-//$test = $conv->source('<html><body><h1>Welcome to PhantomMagick</h1></body></html>');
-//$conv->toJpg();
-//$conv->save(__DIR__ . '/images/test.jpg');
