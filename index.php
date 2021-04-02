@@ -1,27 +1,29 @@
 <?php
 
-function createImage(): string
+function createImage()
 {
     $imageLink = __DIR__ . '/img/banner.jpg';
     $font = __DIR__ . "/font/ptsans.ttf";
     $imageCoverLink = 'https://img2.pngio.com/transparent-grey-background-png-6-png-image-grey-background-png-1920_1080.png';
     $logoLink = __DIR__ . '/img/logo.png';
-    $newImageName = __DIR__  . '/tmp/' . generateRandomName() . '.png';
+    $newImageName = generateRandomName();
+    $newImagePath = __DIR__  . '/tmp/' . $newImageName . '.png';
 
-    $title = 'Пользуясь случаем';
-    $titleSize = 40;
+    $title = 'Анна Махмудова: ';
+    $titleSize = 45;
     $xTitle = 30;
-    $yTitle = 200;
+    $yTitle = 250;
 
-    $text = 'Анна Махмудова: Сенсорная комната для детей! Проект Гармония';
-    $textSize = 20;
-    $xText = 50;
-    $yText= 300;
+    $text = 'Анна Махмудова: !';
+    $textSize = 26;
+    $xText = 30;
+    $yText= 350;
 
     $angle = 0;
 
     // получаем изображение
     $image = imagecreatefromjpeg($imageLink);
+    var_dump(getimagesize($imageLink));
 
     //получаем фильтр для затемнения
     $imageCover = imagecreatefrompng($imageCoverLink);
@@ -46,6 +48,12 @@ function createImage(): string
     //создаем цвет надписи
     $color = imagecolorallocate($image, 0xFF, 0xFF, 0xFF);
 
+    [$title, $countLineTitle] = explodeText($title,35);
+    [$text, ] = explodeText($text,58);
+    if ($countLineTitle > 1) {
+        $yText += $countLineTitle * $titleSize;
+    }
+
     //накладываем заголовок
     imagettftext($image, $titleSize, $angle, $xTitle, $yTitle, $color, $font, $title);
 
@@ -53,19 +61,43 @@ function createImage(): string
     imagettftext($image, $textSize, $angle, $xText, $yText, $color, $font, $text);
 
     //сохраняем изображение во временный файл
-    imagepng($image, $newImageName);
+    imagepng($image, $newImagePath);
 
     //получаем изображение
-    $data = file_get_contents($newImageName);
-
-    //удаляем временный файл
-//    unlink($newImageName);
+    $imgInfo = getimagesize($newImagePath);
+    $imgSize = filesize($newImagePath);
+    $_FILES[] = [
+        'name' => $newImageName,
+        'type' => $imgInfo['mime'],
+        'tmp_name' => $newImagePath,
+        'error' => 0,
+        'size' => $imgSize,
+    ];
+    var_dump($_FILES);
 
     //уничожаем изображение над которым работали
     imagedestroy($image);
+}
 
-    //возвращем изображение в base64
-    return "data:image/png;base64," . base64_encode($data);
+function explodeText($text, $maxChar)
+{
+    $line = '';
+    $return = '';
+    $text = explode(' ', $text);
+    $count = count($text);
+    $countLines = 0;
+
+    for ($i = 0; $i < $count; $i++) {
+        $len = mb_strlen($line) + mb_strlen($text[$i]);
+        if ($i === $count - 1 || $len >= $maxChar) {
+            $return .= trim($line, ' ') . "\n";
+            $countLines++;
+            $line = '';
+        }
+        $line .= $text[$i] . ' ';
+    }
+
+    return [$return, $countLines];
 }
 
 function generateRandomName(int $length = 10): string
@@ -78,3 +110,5 @@ function generateRandomName(int $length = 10): string
     }
     return $randomString;
 }
+
+createImage();
