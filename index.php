@@ -23,7 +23,6 @@ function createImage()
 
     // получаем изображение
     $image = imagecreatefromjpeg($imageLink);
-    var_dump(getimagesize($imageLink));
 
     //получаем фильтр для затемнения
     $imageCover = imagecreatefrompng($imageCoverLink);
@@ -48,6 +47,7 @@ function createImage()
     //создаем цвет надписи
     $color = imagecolorallocate($image, 0xFF, 0xFF, 0xFF);
 
+    //разбиваем на строки и считываемих кол-во
     [$title, $countLineTitle] = explodeText($title,35);
     [$text, ] = explodeText($text,58);
     if ($countLineTitle > 1) {
@@ -63,9 +63,11 @@ function createImage()
     //сохраняем изображение во временный файл
     imagepng($image, $newImagePath);
 
-    //получаем изображение
+    //получаем инф о получившемся изображение
     $imgInfo = getimagesize($newImagePath);
     $imgSize = filesize($newImagePath);
+
+    //записыаем данные в $_FILES
     $_FILES[] = [
         'name' => $newImageName,
         'type' => $imgInfo['mime'],
@@ -73,7 +75,6 @@ function createImage()
         'error' => 0,
         'size' => $imgSize,
     ];
-    var_dump($_FILES);
 
     //уничожаем изображение над которым работали
     imagedestroy($image);
@@ -110,5 +111,3 @@ function generateRandomName(int $length = 10): string
     }
     return $randomString;
 }
-
-createImage();
